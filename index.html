@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <title>For You ❤️</title>
 
+<!-- ✅ FIX iPhone / mobile scaling -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
 body {
     font-family: Arial;
     text-align: center;
-    margin-top: 100px;
+    margin-top: 80px;
     background: #fff0f5;
     overflow: hidden;
 }
@@ -36,19 +39,22 @@ body {
     100% { transform: translateY(-100vh); opacity: 0; }
 }
 
-/* Text */
+/* Title */
 h1 {
     color: #ff4d88;
+    font-size: 22px;
+    padding: 0 10px;
 }
 
 /* Buttons */
 button {
-    padding: 12px 25px;
+    padding: 12px 22px;
     font-size: 18px;
     margin: 10px;
     cursor: pointer;
     border: none;
     border-radius: 10px;
+    touch-action: manipulation;
 }
 
 #yes {
@@ -56,7 +62,7 @@ button {
     color: white;
     position: absolute;
     left: 100px;
-    top: 100px;
+    top: 120px;
 }
 
 #no {
@@ -64,22 +70,42 @@ button {
     color: white;
 }
 
-/* Popup message */
+/* Popup message (LONGER + smoother) */
 .popup {
     position: fixed;
-    background: rgba(255, 77, 136, 0.9);
+    background: rgba(255, 77, 136, 0.95);
     color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
     font-size: 16px;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: fadeOut 1.5s forwards;
+    animation: fadeOut 3.5s forwards; /* ⬅️ longer duration */
+    max-width: 200px;
+    text-align: center;
 }
 
 @keyframes fadeOut {
     0% { opacity: 1; }
+    80% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+/* 📱 Mobile optimization (iPhone friendly) */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 18px;
+    }
+
+    button {
+        font-size: 16px;
+        padding: 10px 18px;
+    }
+
+    #yes {
+        left: 60px;
+        top: 150px;
+    }
 }
 </style>
 </head>
@@ -90,7 +116,7 @@ button {
 
 <h1>Do you want a big wedding? 😏💍</h1>
 
-<button id="yes" onmouseover="moveYes()">Yes 😍</button>
+<button id="yes" onmouseover="moveYes()" ontouchstart="moveYes()">Yes 😍</button>
 <button id="no" onclick="noClicked()">No 😌</button>
 
 <audio autoplay loop>
@@ -99,7 +125,7 @@ button {
 
 <script>
 /* =========================
-   MESSAGE SYSTEM
+   MESSAGES
 ========================= */
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
@@ -124,19 +150,19 @@ document.addEventListener("touchmove", (e) => {
 let touchBoost = 1;
 document.addEventListener("touchstart", () => {
     touchBoost = 3;
-    setTimeout(() => touchBoost = 1, 400);
+    setTimeout(() => touchBoost = 1, 500);
 });
 
 /* =========================
    BUTTON STATE
 ========================= */
 let btnX = 100;
-let btnY = 100;
+let btnY = 120;
 let velocityX = 0;
 let velocityY = 0;
 
 /* =========================
-   RUN AWAY AI BUTTON
+   SMOOTH RUN AWAY AI
 ========================= */
 function animateButton() {
     const button = document.getElementById("yes");
@@ -146,25 +172,24 @@ function animateButton() {
 
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // escape behavior
-    if (distance < 250) {
-        let force = (250 - distance) / 250;
+    if (distance < 260) {
+        let force = (260 - distance) / 260;
 
-        velocityX += dx * 0.25 * force * touchBoost;
-        velocityY += dy * 0.25 * force * touchBoost;
+        velocityX += dx * 0.28 * force * touchBoost;
+        velocityY += dy * 0.28 * force * touchBoost;
     }
 
-    // friction (smooth movement)
-    velocityX *= 0.85;
-    velocityY *= 0.85;
+    // smooth physics
+    velocityX *= 0.86;
+    velocityY *= 0.86;
 
     btnX += velocityX;
     btnY += velocityY;
 
     // boundaries
-    let padding = 20;
-    btnX = Math.max(padding, Math.min(window.innerWidth - 100 - padding, btnX));
-    btnY = Math.max(padding, Math.min(window.innerHeight - 50 - padding, btnY));
+    let padding = 15;
+    btnX = Math.max(padding, Math.min(window.innerWidth - 120, btnX));
+    btnY = Math.max(padding, Math.min(window.innerHeight - 60, btnY));
 
     button.style.left = btnX + "px";
     button.style.top = btnY + "px";
@@ -174,7 +199,7 @@ function animateButton() {
 animateButton();
 
 /* =========================
-   POPUP SYSTEM
+   POPUP (LONG DISPLAY FIX)
 ========================= */
 function showPopup(text, button) {
     const popup = document.createElement("div");
@@ -185,32 +210,32 @@ function showPopup(text, button) {
 
     const rect = button.getBoundingClientRect();
     popup.style.left = rect.left + 50 + "px";
-    popup.style.top = rect.top - 30 + "px";
+    popup.style.top = rect.top - 40 + "px";
 
-    setTimeout(() => popup.remove(), 1500);
+    // auto remove AFTER animation (long stay)
+    setTimeout(() => popup.remove(), 3600);
 }
 
 /* =========================
-   YES BUTTON ACTION
+   YES BUTTON
 ========================= */
 function moveYes() {
     const button = document.getElementById("yes");
 
-    // panic boost
-    velocityX += (Math.random() - 0.5) * 20;
-    velocityY += (Math.random() - 0.5) * 20;
+    velocityX += (Math.random() - 0.5) * 25;
+    velocityY += (Math.random() - 0.5) * 25;
 
     showPopup(messages[index], button);
     index = (index + 1) % messages.length;
 }
 
 /* =========================
-   NO BUTTON ACTION
+   NO BUTTON
 ========================= */
 function noClicked() {
     document.body.innerHTML = `
         <h1>
-        It's okay ❤️ we'll have a big wedding if it makes you happy 😍💍  
+        It's okay ❤️ we'll have a big wedding.
         <br><br>
         stupid fine basbosa 😂❤️
         </h1>
@@ -218,7 +243,7 @@ function noClicked() {
 }
 
 /* =========================
-   HEART ANIMATION
+   HEARTS
 ========================= */
 function createHeart() {
     const heart = document.createElement("div");
