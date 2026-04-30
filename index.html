@@ -61,6 +61,24 @@ button {
     background-color: #ff4d4d;
     color: white;
 }
+
+/* Popup message */
+.popup {
+    position: fixed;
+    background: rgba(255, 77, 136, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: fadeOut 1.5s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
 </style>
 </head>
 
@@ -78,24 +96,39 @@ button {
 </audio>
 
 <script>
-// Move "Yes" button
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
+
+// Move button + show popup
 function moveYes() {
     let button = document.getElementById("yes");
 
-    // Move button
+    // Move button randomly
     button.style.left = Math.random() * (window.innerWidth - 100) + "px";
     button.style.top = Math.random() * (window.innerHeight - 50) + "px";
 
-    // Change text
-    button.innerText = messages[index];
+    // Show popup message
+    showPopup(messages[index], button);
 
-    // Loop messages
     index = (index + 1) % messages.length;
 }
 
-// When she clicks "No"
+// Popup function
+function showPopup(text, button) {
+    const popup = document.createElement("div");
+    popup.classList.add("popup");
+    popup.innerText = text;
+
+    document.body.appendChild(popup);
+
+    const rect = button.getBoundingClientRect();
+    popup.style.left = rect.left + 50 + "px";
+    popup.style.top = rect.top - 30 + "px";
+
+    setTimeout(() => popup.remove(), 1500);
+}
+
+// No button action
 function noClicked() {
     document.body.innerHTML = `
         <h1>
