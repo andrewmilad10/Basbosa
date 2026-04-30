@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>For You ❤️</title>
 
-<!-- ✅ FIX iPhone / mobile scaling -->
+<!-- 📱 Mobile / iPhone fix -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
@@ -61,8 +61,6 @@ button {
     background-color: #4CAF50;
     color: white;
     position: absolute;
-    left: 100px;
-    top: 120px;
 }
 
 #no {
@@ -70,7 +68,7 @@ button {
     color: white;
 }
 
-/* Popup message (LONGER + smoother) */
+/* Popup */
 .popup {
     position: fixed;
     background: rgba(255, 77, 136, 0.95);
@@ -80,8 +78,8 @@ button {
     font-size: 16px;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: fadeOut 3.5s forwards; /* ⬅️ longer duration */
-    max-width: 200px;
+    animation: fadeOut 3.5s forwards;
+    max-width: 220px;
     text-align: center;
 }
 
@@ -91,21 +89,10 @@ button {
     100% { opacity: 0; }
 }
 
-/* 📱 Mobile optimization (iPhone friendly) */
+/* Mobile tuning */
 @media (max-width: 600px) {
-    h1 {
-        font-size: 18px;
-    }
-
-    button {
-        font-size: 16px;
-        padding: 10px 18px;
-    }
-
-    #yes {
-        left: 60px;
-        top: 150px;
-    }
+    h1 { font-size: 18px; }
+    button { font-size: 16px; padding: 10px 18px; }
 }
 </style>
 </head>
@@ -131,10 +118,10 @@ let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy �
 let index = 0;
 
 /* =========================
-   TOUCH + MOUSE TRACKING
+   MOUSE + TOUCH TRACKING
 ========================= */
-let mouseX = 0;
-let mouseY = 0;
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
 
 document.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
@@ -146,7 +133,22 @@ document.addEventListener("touchmove", (e) => {
     mouseY = e.touches[0].clientY;
 }, { passive: true });
 
-/* Mobile panic boost */
+/* =========================
+   BUTTON INIT (FIXED)
+========================= */
+const button = document.getElementById("yes");
+
+// real starting position (fix top-left bug)
+let rect = button.getBoundingClientRect();
+let btnX = rect.left;
+let btnY = rect.top;
+
+let velocityX = 0;
+let velocityY = 0;
+
+/* =========================
+   TOUCH BOOST
+========================= */
 let touchBoost = 1;
 document.addEventListener("touchstart", () => {
     touchBoost = 3;
@@ -154,19 +156,9 @@ document.addEventListener("touchstart", () => {
 });
 
 /* =========================
-   BUTTON STATE
-========================= */
-let btnX = 100;
-let btnY = 120;
-let velocityX = 0;
-let velocityY = 0;
-
-/* =========================
-   SMOOTH RUN AWAY AI
+   AI RUNAWAY BUTTON
 ========================= */
 function animateButton() {
-    const button = document.getElementById("yes");
-
     const dx = btnX - mouseX;
     const dy = btnY - mouseY;
 
@@ -175,19 +167,19 @@ function animateButton() {
     if (distance < 260) {
         let force = (260 - distance) / 260;
 
-        velocityX += dx * 0.28 * force * touchBoost;
-        velocityY += dy * 0.28 * force * touchBoost;
+        velocityX += dx * 0.25 * force * touchBoost;
+        velocityY += dy * 0.25 * force * touchBoost;
     }
 
-    // smooth physics
-    velocityX *= 0.86;
-    velocityY *= 0.86;
+    // smooth motion
+    velocityX *= 0.85;
+    velocityY *= 0.85;
 
     btnX += velocityX;
     btnY += velocityY;
 
     // boundaries
-    let padding = 15;
+    let padding = 10;
     btnX = Math.max(padding, Math.min(window.innerWidth - 120, btnX));
     btnY = Math.max(padding, Math.min(window.innerHeight - 60, btnY));
 
@@ -196,12 +188,19 @@ function animateButton() {
 
     requestAnimationFrame(animateButton);
 }
+
 animateButton();
 
 /* =========================
-   POPUP (LONG DISPLAY FIX)
+   POPUP SYSTEM (NO SPAM)
 ========================= */
+let popupCooldown = false;
+
 function showPopup(text, button) {
+    if (popupCooldown) return;
+
+    popupCooldown = true;
+
     const popup = document.createElement("div");
     popup.classList.add("popup");
     popup.innerText = text;
@@ -212,18 +211,18 @@ function showPopup(text, button) {
     popup.style.left = rect.left + 50 + "px";
     popup.style.top = rect.top - 40 + "px";
 
-    // auto remove AFTER animation (long stay)
-    setTimeout(() => popup.remove(), 3600);
+    setTimeout(() => {
+        popup.remove();
+        popupCooldown = false;
+    }, 3500);
 }
 
 /* =========================
    YES BUTTON
 ========================= */
 function moveYes() {
-    const button = document.getElementById("yes");
-
-    velocityX += (Math.random() - 0.5) * 25;
-    velocityY += (Math.random() - 0.5) * 25;
+    velocityX += (Math.random() - 0.5) * 20;
+    velocityY += (Math.random() - 0.5) * 20;
 
     showPopup(messages[index], button);
     index = (index + 1) % messages.length;
@@ -235,7 +234,7 @@ function moveYes() {
 function noClicked() {
     document.body.innerHTML = `
         <h1>
-        It's okay ❤️ we'll have a big wedding.
+        It's okay ❤️ we'll have a big wedding 😍💍  
         <br><br>
         stupid fine basbosa 😂❤️
         </h1>
