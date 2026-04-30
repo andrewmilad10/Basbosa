@@ -79,10 +79,20 @@ button {
 
 <script>
 // Move "Yes" button
+let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
+let index = 0;
 function moveYes() {
     let button = document.getElementById("yes");
+
+    // Move button
     button.style.left = Math.random() * (window.innerWidth - 100) + "px";
     button.style.top = Math.random() * (window.innerHeight - 50) + "px";
+
+    // Change text
+    button.innerText = messages[index];
+
+    // Loop messages
+    index = (index + 1) % messages.length;
 }
 
 // When she clicks "No"
