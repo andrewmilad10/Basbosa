@@ -11,43 +11,49 @@ body {
     margin: 0;
     font-family: Arial;
     background: #fff0f5;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
     overflow: hidden;
+    text-align: center;
 }
 
 h1 {
     color: #ff4d88;
-    margin-top: 30px;
+    margin-top: 40px;
 }
 
-/* BUTTONS */
+/* BUTTON ROW (FIXED SIDE BY SIDE) */
 .container {
-    margin-top: 80px;
+    margin-top: 60px;
+    display: flex;
+    gap: 20px;
     position: relative;
 }
 
+/* BUTTONS */
 button {
     padding: 12px 22px;
     font-size: 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    position: relative;
 }
 
-/* YES button starts near NO */
 #yes {
-    position: absolute;
     background: #4CAF50;
     color: white;
 }
 
 #no {
-    position: absolute;
     background: #ff4d4d;
     color: white;
 }
 
-/* POPUP (single) */
+/* POPUP */
 .popup {
     position: absolute;
     background: rgba(255, 77, 136, 0.95);
@@ -58,6 +64,7 @@ button {
     pointer-events: none;
     transform: translate(-50%, -50%);
     white-space: nowrap;
+    z-index: 999;
 }
 </style>
 </head>
@@ -85,17 +92,6 @@ let index = 0;
 const yes = document.getElementById("yes");
 const no = document.getElementById("no");
 
-/* position NO first (center-ish) */
-no.style.left = "calc(50% - 100px)";
-no.style.top = "200px";
-
-/* YES starts BESIDE NO */
-let yesX = no.getBoundingClientRect().left + 120;
-let yesY = no.getBoundingClientRect().top;
-
-yes.style.left = yesX + "px";
-yes.style.top = yesY + "px";
-
 /* ======================
    SINGLE POPUP
 ====================== */
@@ -105,37 +101,47 @@ document.body.appendChild(popup);
 popup.style.display = "none";
 
 /* ======================
-   MOVE YES BUTTON
+   SAFE RANDOM POSITION (NO OFF SCREEN)
+====================== */
+function safeRandomPosition(btn) {
+    const padding = 10;
+
+    const maxX = window.innerWidth - btn.offsetWidth - padding;
+    const maxY = window.innerHeight - btn.offsetHeight - 200; // keep under title area
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY + 120; // below title
+
+    btn.style.position = "absolute";
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+
+    return btn.getBoundingClientRect();
+}
+
+/* ======================
+   YES CLICK
 ====================== */
 function moveYes() {
 
-    const maxX = window.innerWidth - yes.offsetWidth;
-    const maxY = window.innerHeight - yes.offsetHeight;
+    const rect = safeRandomPosition(yes);
 
-    yesX = Math.random() * maxX;
-    yesY = Math.random() * maxY;
-
-    yes.style.left = yesX + "px";
-    yes.style.top = yesY + "px";
-
-    /* update popup */
     popup.innerText = messages[index];
     index = (index + 1) % messages.length;
 
     popup.style.display = "block";
 
-    const rect = yes.getBoundingClientRect();
-
+    /* place popup beside button */
     popup.style.left = (rect.right + 40) + "px";
     popup.style.top = (rect.top + rect.height / 2) + "px";
 
-    /* fix if off screen */
+    /* flip if off screen */
     if (popup.getBoundingClientRect().right > window.innerWidth) {
         popup.style.left = (rect.left - 60) + "px";
     }
 }
 
-/* click + touch */
+/* mobile support */
 yes.addEventListener("click", moveYes);
 yes.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -143,7 +149,7 @@ yes.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 /* ======================
-   NO BUTTON FINAL PAGE
+   NO BUTTON FINAL SCREEN
 ====================== */
 no.addEventListener("click", () => {
     document.body.innerHTML = `
