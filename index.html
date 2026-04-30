@@ -11,8 +11,8 @@ body {
     margin: 0;
     font-family: Arial;
     background: #fff0f5;
-    overflow: hidden;
     text-align: center;
+    overflow: hidden;
 }
 
 h1 {
@@ -20,7 +20,7 @@ h1 {
     margin: 15px 0;
 }
 
-/* 🎯 ARENA FIXED CENTER */
+/* CENTER ARENA */
 #arena {
     position: relative;
     width: 85vw;
@@ -28,30 +28,33 @@ h1 {
     margin: 10px auto;
     border: 3px dashed #ff4d88;
     border-radius: 15px;
-    overflow: hidden;
     background: rgba(255,255,255,0.5);
+    overflow: hidden;
 }
 
 /* BUTTON */
-button {
+#yes {
+    position: absolute;
     padding: 12px 22px;
     font-size: 18px;
     border: none;
     border-radius: 10px;
+    background: #4CAF50;
+    color: white;
     cursor: pointer;
     touch-action: manipulation;
 }
 
-#yes {
-    position: absolute;
-    background: #4CAF50;
-    color: white;
-}
-
+/* NO BUTTON */
 #no {
+    margin-top: 10px;
+    padding: 12px 22px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
     background: #ff4d4d;
     color: white;
-    margin-top: 10px;
+    cursor: pointer;
 }
 
 /* POPUP */
@@ -64,7 +67,7 @@ button {
     font-size: 15px;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: fadeOut 3.2s forwards;
+    animation: fadeOut 3.5s forwards;
 }
 
 @keyframes fadeOut {
@@ -80,107 +83,58 @@ button {
 <h1>Do you want a big wedding? 😏💍</h1>
 
 <div id="arena">
-    <button id="yes" onmouseover="moveYes()" ontouchstart="moveYes()">Yes 😍</button>
+    <button id="yes">Yes 😍</button>
 </div>
 
-<button id="no" onclick="noClicked()">No 😌</button>
+<button id="no">No 😌</button>
 
 <script>
-
-/* =======================
+/* ======================
    MESSAGES
-======================= */
+====================== */
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
 
-/* =======================
-   ARENA + BUTTON SETUP
-======================= */
+/* ======================
+   SETUP
+====================== */
 const arena = document.getElementById("arena");
 const button = document.getElementById("yes");
 
-let arenaRect = arena.getBoundingClientRect();
-
-/* IMPORTANT FIX: position inside arena */
-let btnX = arena.clientWidth / 2;
-let btnY = arena.clientHeight / 2;
-
-let vx = 0;
-let vy = 0;
-
-/* =======================
-   POINTER TRACKING (INSIDE ARENA ONLY)
-======================= */
-let mouseX = btnX;
-let mouseY = btnY;
-
-function updateArenaRect() {
-    arenaRect = arena.getBoundingClientRect();
-}
-
-window.addEventListener("resize", updateArenaRect);
-
-arena.addEventListener("mousemove", (e) => {
-    updateArenaRect();
-    mouseX = e.clientX - arenaRect.left;
-    mouseY = e.clientY - arenaRect.top;
-});
-
-arena.addEventListener("touchmove", (e) => {
-    updateArenaRect();
-    mouseX = e.touches[0].clientX - arenaRect.left;
-    mouseY = e.touches[0].clientY - arenaRect.top;
-}, { passive: true });
-
-/* =======================
-   TOUCH BOOST
-======================= */
-let boost = 1;
-
-document.addEventListener("touchstart", () => {
-    boost = 3;
-    setTimeout(() => boost = 1, 500);
-});
-
-/* =======================
-   AI MOVEMENT (LOCKED IN ARENA)
-======================= */
-function animate() {
-    const dx = btnX - mouseX;
-    const dy = btnY - mouseY;
-
-    const dist = Math.sqrt(dx*dx + dy*dy);
-
-    if (dist < 220) {
-        let f = (220 - dist) / 220;
-        vx += dx * 0.25 * f * boost;
-        vy += dy * 0.25 * f * boost;
-    }
-
-    vx *= 0.86;
-    vy *= 0.86;
-
-    btnX += vx;
-    btnY += vy;
-
-    /* 🚫 HARD BOUNDARIES (THIS FIXES EDGE BUG) */
+function moveButtonRandom() {
     const maxX = arena.clientWidth - button.offsetWidth;
     const maxY = arena.clientHeight - button.offsetHeight;
 
-    btnX = Math.max(0, Math.min(maxX, btnX));
-    btnY = Math.max(0, Math.min(maxY, btnY));
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
 
-    button.style.left = btnX + "px";
-    button.style.top = btnY + "px";
-
-    requestAnimationFrame(animate);
+    button.style.left = x + "px";
+    button.style.top = y + "px";
 }
 
-animate();
+/* start in middle */
+moveButtonRandom();
 
-/* =======================
-   POPUP (NO SPAM)
-======================= */
+/* ======================
+   CLICK = MOVE + POPUP
+====================== */
+button.addEventListener("click", () => {
+    moveButtonRandom();
+    showPopup(messages[index]);
+    index = (index + 1) % messages.length;
+});
+
+/* mobile support */
+button.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    moveButtonRandom();
+    showPopup(messages[index]);
+    index = (index + 1) % messages.length;
+}, { passive: false });
+
+/* ======================
+   POPUP SYSTEM (NO SPAM)
+====================== */
 let popupLock = false;
 
 function showPopup(text) {
@@ -200,21 +154,10 @@ function showPopup(text) {
     }, 3500);
 }
 
-/* =======================
-   YES BUTTON
-======================= */
-function moveYes() {
-    vx += (Math.random() - 0.5) * 20;
-    vy += (Math.random() - 0.5) * 20;
-
-    showPopup(messages[index]);
-    index = (index + 1) % messages.length;
-}
-
-/* =======================
+/* ======================
    NO BUTTON
-======================= */
-function noClicked() {
+====================== */
+document.getElementById("no").onclick = () => {
     document.body.innerHTML = `
         <h1>
         It's okay ❤️ we'll have a big wedding 😍💍  
@@ -222,7 +165,7 @@ function noClicked() {
         stupid fine basbosa 😂❤️
         </h1>
     `;
-}
+};
 </script>
 
 </body>
