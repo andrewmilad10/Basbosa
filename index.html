@@ -132,32 +132,52 @@ function safeMove(btn) {
 /* ======================
    YES CLICK
 ====================== */
-function moveYes() {
+// function moveYes() {
 
-    const rect = safeMove(yes);
+//     const rect = safeMove(yes);
+
+//     popup.innerText = messages[index];
+//     index = (index + 1) % messages.length;
+
+//     popup.style.display = "block";
+
+//     const centerX = rect.left + rect.width / 2;
+//     const centerY = rect.top + rect.height / 2;
+
+//     const popupWidth = 120;
+
+//     let leftPos = centerX + 40;
+
+//     if (leftPos + popupWidth > getVW()) {
+//         leftPos = centerX - 40;
+//     }
+
+//     popup.style.left = leftPos + "px";
+//     popup.style.top = centerY + "px";
+
+//     /* ⏱️ DISAPPEAR AFTER 1 SECOND */
+//     setTimeout(() => {
+//         popup.style.display = "none";
+//     }, 1000);
+// }
+
+    function moveYes() {
+
+    safeMove(yes);
 
     popup.innerText = messages[index];
     index = (index + 1) % messages.length;
 
-    popup.style.display = "block";
+    /* show popup */
+    popup.style.opacity = "1";
+    popup.style.transform = "translate(-50%, 0px)";
 
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    /* reset animation trigger */
+    clearTimeout(popup.timer);
 
-    const popupWidth = 120;
-
-    let leftPos = centerX + 40;
-
-    if (leftPos + popupWidth > getVW()) {
-        leftPos = centerX - 40;
-    }
-
-    popup.style.left = leftPos + "px";
-    popup.style.top = centerY + "px";
-
-    /* ⏱️ DISAPPEAR AFTER 1 SECOND */
-    setTimeout(() => {
-        popup.style.display = "none";
+    popup.timer = setTimeout(() => {
+        popup.style.opacity = "0";
+        popup.style.transform = "translate(-50%, 20px)";
     }, 1000);
 }
 
