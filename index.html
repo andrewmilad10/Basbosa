@@ -141,13 +141,22 @@ function moveYes() {
 
     popup.style.display = "block";
 
-    popup.style.left = (rect.right + 40) + "px";
-    popup.style.top = (rect.top + rect.height / 2) + "px";
+    /* 📌 IMPORTANT FIX: use center point of button */
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-    /* flip if needed */
-    if (popup.getBoundingClientRect().right > getVW()) {
-        popup.style.left = (rect.left - 60) + "px";
+    const popupWidth = 120; // approximate safe width
+
+    /* always try right side first */
+    let leftPos = centerX + 40;
+
+    /* if off screen → switch to left side */
+    if (leftPos + popupWidth > getVW()) {
+        leftPos = centerX - 40;
     }
+
+    popup.style.left = leftPos + "px";
+    popup.style.top = centerY + "px";
 }
 
 /* touch support */
