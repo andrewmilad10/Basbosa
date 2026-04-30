@@ -62,18 +62,23 @@ button {
     white-space: nowrap;
 } */
     .popup {
-    position: absolute;
+    position: fixed;
+    left: 50%;
+    bottom: 40px;
+
+    transform: translate(-50%, 20px);
     background: rgba(255, 77, 136, 0.95);
     color: white;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 16px;
     white-space: nowrap;
+    pointer-events: none;
 
     opacity: 0;
-    transition: opacity 0.4s ease;
+    z-index: 9999;
+
+    transition: opacity 0.35s ease, transform 0.35s ease;
 }
 </style>
 </head>
@@ -182,13 +187,21 @@ function safeMove(btn) {
     popup.innerText = messages[index];
     index = (index + 1) % messages.length;
 
-    /* show popup */
+    /* FORCE RESET (important fix) */
+    popup.style.transition = "none";
+    popup.style.opacity = "0";
+    popup.style.transform = "translate(-50%, 20px)";
+
+    /* force reflow (fix mobile bug) */
+    void popup.offsetWidth;
+
+    /* animate in */
+    popup.style.transition = "opacity 0.35s ease, transform 0.35s ease";
     popup.style.opacity = "1";
     popup.style.transform = "translate(-50%, 0px)";
 
-    /* reset animation trigger */
+    /* hide after 1s */
     clearTimeout(popup.timer);
-
     popup.timer = setTimeout(() => {
         popup.style.opacity = "0";
         popup.style.transform = "translate(-50%, 20px)";
