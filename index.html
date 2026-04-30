@@ -141,22 +141,24 @@ function moveYes() {
 
     popup.style.display = "block";
 
-    /* 📌 IMPORTANT FIX: use center point of button */
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const popupWidth = 120; // approximate safe width
+    const popupWidth = 120;
 
-    /* always try right side first */
     let leftPos = centerX + 40;
 
-    /* if off screen → switch to left side */
     if (leftPos + popupWidth > getVW()) {
         leftPos = centerX - 40;
     }
 
     popup.style.left = leftPos + "px";
     popup.style.top = centerY + "px";
+
+    /* ⏱️ DISAPPEAR AFTER 1 SECOND */
+    setTimeout(() => {
+        popup.style.display = "none";
+    }, 1000);
 }
 
 /* touch support */
