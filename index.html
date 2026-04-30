@@ -23,6 +23,7 @@ h1 {
 /* BUTTONS */
 .container {
     margin-top: 80px;
+    position: relative;
 }
 
 button {
@@ -31,23 +32,22 @@ button {
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    margin: 10px;
 }
 
+/* YES button starts near NO */
 #yes {
+    position: absolute;
     background: #4CAF50;
     color: white;
-    position: absolute;
-    left: 100px;
-    top: 200px;
 }
 
 #no {
+    position: absolute;
     background: #ff4d4d;
     color: white;
 }
 
-/* SINGLE POPUP */
+/* POPUP (single) */
 .popup {
     position: absolute;
     background: rgba(255, 77, 136, 0.95);
@@ -67,8 +67,8 @@ button {
 <h1>Do you want a big wedding? 😏💍</h1>
 
 <div class="container">
-    <button id="yes">Yes 😍</button>
     <button id="no">No 😌</button>
+    <button id="yes">Yes 😍</button>
 </div>
 
 <script>
@@ -80,41 +80,53 @@ let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy �
 let index = 0;
 
 /* ======================
-   BUTTON
+   BUTTONS
 ====================== */
-const button = document.getElementById("yes");
+const yes = document.getElementById("yes");
+const no = document.getElementById("no");
 
-/* popup (ONLY ONE) */
+/* position NO first (center-ish) */
+no.style.left = "calc(50% - 100px)";
+no.style.top = "200px";
+
+/* YES starts BESIDE NO */
+let yesX = no.getBoundingClientRect().left + 120;
+let yesY = no.getBoundingClientRect().top;
+
+yes.style.left = yesX + "px";
+yes.style.top = yesY + "px";
+
+/* ======================
+   SINGLE POPUP
+====================== */
 let popup = document.createElement("div");
 popup.className = "popup";
 document.body.appendChild(popup);
 popup.style.display = "none";
 
 /* ======================
-   MOVE + SHOW POPUP
+   MOVE YES BUTTON
 ====================== */
-function moveAndShow() {
+function moveYes() {
 
-    /* move button randomly */
-    const maxX = window.innerWidth - button.offsetWidth;
-    const maxY = window.innerHeight - button.offsetHeight;
+    const maxX = window.innerWidth - yes.offsetWidth;
+    const maxY = window.innerHeight - yes.offsetHeight;
 
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
+    yesX = Math.random() * maxX;
+    yesY = Math.random() * maxY;
 
-    button.style.left = x + "px";
-    button.style.top = y + "px";
+    yes.style.left = yesX + "px";
+    yes.style.top = yesY + "px";
 
-    /* update popup text */
+    /* update popup */
     popup.innerText = messages[index];
     index = (index + 1) % messages.length;
 
-    /* show popup */
     popup.style.display = "block";
 
-    const rect = button.getBoundingClientRect();
+    const rect = yes.getBoundingClientRect();
 
-    popup.style.left = (rect.left + rect.width + 50) + "px";
+    popup.style.left = (rect.right + 40) + "px";
     popup.style.top = (rect.top + rect.height / 2) + "px";
 
     /* fix if off screen */
@@ -124,20 +136,24 @@ function moveAndShow() {
 }
 
 /* click + touch */
-button.addEventListener("click", moveAndShow);
-
-button.addEventListener("touchstart", (e) => {
+yes.addEventListener("click", moveYes);
+yes.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    moveAndShow();
+    moveYes();
 }, { passive: false });
 
-/* NO button */
-document.getElementById("no").onclick = () => {
-    popup.innerText = "okay 😌❤️";
-    popup.style.display = "block";
-    popup.style.left = "50%";
-    popup.style.top = "60%";
-};
+/* ======================
+   NO BUTTON FINAL PAGE
+====================== */
+no.addEventListener("click", () => {
+    document.body.innerHTML = `
+        <h1>
+        It's okay ❤️ we'll have a big wedding 😍💍  
+        <br><br>
+        stupid fine basbosa 😂❤️
+        </h1>
+    `;
+});
 
 </script>
 
