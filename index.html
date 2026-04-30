@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>For You ❤️</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
@@ -20,21 +19,14 @@ h1 {
     margin-top: 40px;
 }
 
-/* BUTTON ROW */
-.container {
-    margin-top: 60px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-/* BUTTONS */
 button {
     padding: 12px 22px;
     font-size: 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 #yes {
@@ -49,34 +41,32 @@ button {
     position: relative;
 }
 
-/* POPUP */
-/* .popup {
-    position: absolute;
-    background: rgba(255, 77, 136, 0.95);
-    color: white;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    white-space: nowrap;
-} */
-    .popup {
+.toast {
     position: fixed;
-    left: 50%;
     bottom: 40px;
-
-    transform: translateX(-50%);
+    left: 50%;
+    transform: translateX(-50%) translateY(16px) scale(0.92);
     background: rgba(255, 77, 136, 0.95);
     color: white;
-    padding: 12px 16px;
-    border-radius: 14px;
-    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 20px;
+    font-size: 15px;
     white-space: nowrap;
     pointer-events: none;
     z-index: 9999;
-
     opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 </style>
 </head>
@@ -85,36 +75,19 @@ button {
 
 <h1>Do you want a big wedding? 😏💍</h1>
 
-<div class="container">
+<div style="margin-top: 60px; display: flex; justify-content: center; gap: 20px;">
     <button id="no">No 😌</button>
     <button id="yes">Yes 😍</button>
 </div>
 
 <script>
 
-/* ======================
-   MESSAGES
-====================== */
-let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
+const messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
 
-/* ======================
-   BUTTONS
-====================== */
 const yes = document.getElementById("yes");
 const no = document.getElementById("no");
 
-/* ======================
-   SINGLE POPUP
-====================== */
-let popup = document.createElement("div");
-popup.className = "popup";
-document.body.appendChild(popup);
-popup.style.display = "none";
-
-/* ======================
-   MOBILE SAFE VIEWPORT FIX
-====================== */
 function getVW() {
     return window.visualViewport ? window.visualViewport.width : window.innerWidth;
 }
@@ -123,111 +96,58 @@ function getVH() {
     return window.visualViewport ? window.visualViewport.height : window.innerHeight;
 }
 
-/* ======================
-   SAFE RANDOM POSITION
-====================== */
 function safeMove(btn) {
-
     const padding = 15;
-
     const vw = getVW();
     const vh = getVH();
-
     const maxX = vw - btn.offsetWidth - padding;
     const maxY = vh - btn.offsetHeight - 200;
-
     const x = Math.random() * maxX + padding;
     const y = Math.random() * maxY + 120;
-
     btn.style.position = "absolute";
     btn.style.left = x + "px";
     btn.style.top = y + "px";
-
-    return btn.getBoundingClientRect();
 }
 
-/* ======================
-   YES CLICK
-====================== */
-// function moveYes() {
+function showToast(text) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = text;
+    document.body.appendChild(toast);
 
-//     const rect = safeMove(yes);
-
-//     popup.innerText = messages[index];
-//     index = (index + 1) % messages.length;
-
-//     popup.style.display = "block";
-
-//     const centerX = rect.left + rect.width / 2;
-//     const centerY = rect.top + rect.height / 2;
-
-//     const popupWidth = 120;
-
-//     let leftPos = centerX + 40;
-
-//     if (leftPos + popupWidth > getVW()) {
-//         leftPos = centerX - 40;
-//     }
-
-//     popup.style.left = leftPos + "px";
-//     popup.style.top = centerY + "px";
-
-//     /* ⏱️ DISAPPEAR AFTER 1 SECOND */
-//     setTimeout(() => {
-//         popup.style.display = "none";
-//     }, 1000);
-// }
-
-    function moveYes() {
-
-    safeMove(yes);
-
-    popup.innerText = messages[index];
-    index = (index + 1) % messages.length;
-
-    showPopup();
-}
-    let hideTimeout;
-
-function showPopup() {
-
-    clearTimeout(hideTimeout);
-
-    // instantly show
-    popup.style.opacity = "1";
-
-    // ensure it's visible before animation
     requestAnimationFrame(() => {
-        popup.style.opacity = "1";
+        requestAnimationFrame(() => toast.classList.add('show'));
     });
 
-    // hide after 1 second
-    hideTimeout = setTimeout(() => {
-        popup.style.opacity = "0";
-    }, 1000);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 350);
+    }, 1200);
 }
 
-/* touch support */
+function moveYes() {
+    safeMove(yes);
+    showToast(messages[index % messages.length]);
+    index++;
+}
+
 yes.addEventListener("click", moveYes);
-yes.addEventListener("touchstart", (e) => {
+yes.addEventListener("touchend", (e) => {
     e.preventDefault();
     moveYes();
 }, { passive: false });
 
-/* ======================
-   NO BUTTON FINAL SCREEN
-====================== */
 no.addEventListener("click", () => {
     document.body.innerHTML = `
-        <h1>
-        It's okay ❤️ we'll have a big wedding 😍💍  
-        <br><br>
-        stupid fine basbosa 😂❤️
+        <h1 style="color:#ff4d88; margin-top:80px;">
+            It's okay ❤️ we'll have a big wedding 😍💍
+            <br><br>
+            stupid fine basbosa 😂❤️
         </h1>
     `;
 });
 
 </script>
-
 </body>
 </html>
