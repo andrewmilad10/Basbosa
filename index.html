@@ -20,26 +20,26 @@ h1 {
     margin-top: 30px;
 }
 
-/* BUTTON WRAPPER */
+/* BUTTONS */
 .container {
     margin-top: 80px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
 }
 
-/* BUTTONS */
 button {
     padding: 12px 22px;
     font-size: 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    margin: 10px;
 }
 
 #yes {
     background: #4CAF50;
     color: white;
+    position: absolute;
+    left: 100px;
+    top: 200px;
 }
 
 #no {
@@ -47,7 +47,7 @@ button {
     color: white;
 }
 
-/* POPUP */
+/* SINGLE POPUP */
 .popup {
     position: absolute;
     background: rgba(255, 77, 136, 0.95);
@@ -57,14 +57,7 @@ button {
     font-size: 15px;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: fadeOut 3.2s forwards;
     white-space: nowrap;
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
 }
 </style>
 </head>
@@ -87,54 +80,64 @@ let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy �
 let index = 0;
 
 /* ======================
-   YES BUTTON POPUP
+   BUTTON
 ====================== */
-const yesBtn = document.getElementById("yes");
-const noBtn = document.getElementById("no");
+const button = document.getElementById("yes");
 
-yesBtn.addEventListener("click", (e) => {
-    showPopup(e.target, messages[index]);
-    index = (index + 1) % messages.length;
-});
-
-/* mobile support */
-yesBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    showPopup(yesBtn, messages[index]);
-    index = (index + 1) % messages.length;
-}, { passive: false });
+/* popup (ONLY ONE) */
+let popup = document.createElement("div");
+popup.className = "popup";
+document.body.appendChild(popup);
+popup.style.display = "none";
 
 /* ======================
-   NO BUTTON ACTION
+   MOVE + SHOW POPUP
 ====================== */
-noBtn.addEventListener("click", (e) => {
-    showPopup(e.target, "okay 😌❤️");
-});
+function moveAndShow() {
 
-/* ======================
-   POPUP NEXT TO BUTTON
-====================== */
-function showPopup(button, text) {
+    /* move button randomly */
+    const maxX = window.innerWidth - button.offsetWidth;
+    const maxY = window.innerHeight - button.offsetHeight;
 
-    const popup = document.createElement("div");
-    popup.className = "popup";
-    popup.innerText = text;
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
 
-    document.body.appendChild(popup);
+    button.style.left = x + "px";
+    button.style.top = y + "px";
+
+    /* update popup text */
+    popup.innerText = messages[index];
+    index = (index + 1) % messages.length;
+
+    /* show popup */
+    popup.style.display = "block";
 
     const rect = button.getBoundingClientRect();
 
-    // position beside button
-    popup.style.left = (rect.right + 60) + "px";
+    popup.style.left = (rect.left + rect.width + 50) + "px";
     popup.style.top = (rect.top + rect.height / 2) + "px";
 
-    // if off screen → flip left side
+    /* fix if off screen */
     if (popup.getBoundingClientRect().right > window.innerWidth) {
         popup.style.left = (rect.left - 60) + "px";
     }
-
-    setTimeout(() => popup.remove(), 3200);
 }
+
+/* click + touch */
+button.addEventListener("click", moveAndShow);
+
+button.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    moveAndShow();
+}, { passive: false });
+
+/* NO button */
+document.getElementById("no").onclick = () => {
+    popup.innerText = "okay 😌❤️";
+    popup.style.display = "block";
+    popup.style.left = "50%";
+    popup.style.top = "60%";
+};
 
 </script>
 
