@@ -17,22 +17,10 @@ body {
 
 h1 {
     color: #ff4d88;
-    margin: 15px 0;
+    margin-top: 20px;
 }
 
-/* CENTER ARENA */
-#arena {
-    position: relative;
-    width: 85vw;
-    height: 70vh;
-    margin: 10px auto;
-    border: 3px dashed #ff4d88;
-    border-radius: 15px;
-    background: rgba(255,255,255,0.5);
-    overflow: hidden;
-}
-
-/* BUTTON */
+/* YES BUTTON (default position handled by browser first) */
 #yes {
     position: absolute;
     padding: 12px 22px;
@@ -42,12 +30,11 @@ h1 {
     background: #4CAF50;
     color: white;
     cursor: pointer;
-    touch-action: manipulation;
 }
 
 /* NO BUTTON */
 #no {
-    margin-top: 10px;
+    margin-top: 80px;
     padding: 12px 22px;
     font-size: 18px;
     border: none;
@@ -82,58 +69,54 @@ h1 {
 
 <h1>Do you want a big wedding? 😏💍</h1>
 
-<div id="arena">
-    <button id="yes">Yes 😍</button>
-</div>
-
+<button id="yes">Yes 😍</button>
 <button id="no">No 😌</button>
 
 <script>
+
 /* ======================
    MESSAGES
 ====================== */
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
 
-/* ======================
-   SETUP
-====================== */
-const arena = document.getElementById("arena");
 const button = document.getElementById("yes");
 
-function moveButtonRandom() {
-    const maxX = arena.clientWidth - button.offsetWidth;
-    const maxY = arena.clientHeight - button.offsetHeight;
+/* ======================
+   START POSITION (DEFAULT FLOW)
+   -> browser places it first, then we read it
+====================== */
+let rect = button.getBoundingClientRect();
 
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
-
-    button.style.left = x + "px";
-    button.style.top = y + "px";
-}
-
-/* start in middle */
-moveButtonRandom();
+let btnX = rect.left;
+let btnY = rect.top;
 
 /* ======================
-   CLICK = MOVE + POPUP
+   MOVE BUTTON ON CLICK ONLY
 ====================== */
-button.addEventListener("click", () => {
-    moveButtonRandom();
+function moveButton() {
+    const maxX = window.innerWidth - button.offsetWidth;
+    const maxY = window.innerHeight - button.offsetHeight;
+
+    btnX = Math.random() * maxX;
+    btnY = Math.random() * maxY;
+
+    button.style.left = btnX + "px";
+    button.style.top = btnY + "px";
+
     showPopup(messages[index]);
     index = (index + 1) % messages.length;
-});
+}
 
-/* mobile support */
+/* click + mobile tap */
+button.addEventListener("click", moveButton);
 button.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    moveButtonRandom();
-    showPopup(messages[index]);
-    index = (index + 1) % messages.length;
+    moveButton();
 }, { passive: false });
 
 /* ======================
-   POPUP SYSTEM (NO SPAM)
+   POPUP (NO SPAM)
 ====================== */
 let popupLock = false;
 
@@ -166,6 +149,7 @@ document.getElementById("no").onclick = () => {
         </h1>
     `;
 };
+
 </script>
 
 </body>
