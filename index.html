@@ -17,36 +17,39 @@ body {
 
 h1 {
     color: #ff4d88;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
-/* YES BUTTON (default position handled by browser first) */
-#yes {
-    position: absolute;
+/* BUTTON WRAPPER */
+.container {
+    margin-top: 80px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* BUTTONS */
+button {
     padding: 12px 22px;
     font-size: 18px;
     border: none;
     border-radius: 10px;
+    cursor: pointer;
+}
+
+#yes {
     background: #4CAF50;
     color: white;
-    cursor: pointer;
 }
 
-/* NO BUTTON */
 #no {
-    margin-top: 80px;
-    padding: 12px 22px;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
     background: #ff4d4d;
     color: white;
-    cursor: pointer;
 }
 
 /* POPUP */
 .popup {
-    position: fixed;
+    position: absolute;
     background: rgba(255, 77, 136, 0.95);
     color: white;
     padding: 10px 14px;
@@ -54,7 +57,8 @@ h1 {
     font-size: 15px;
     pointer-events: none;
     transform: translate(-50%, -50%);
-    animation: fadeOut 3.5s forwards;
+    animation: fadeOut 3.2s forwards;
+    white-space: nowrap;
 }
 
 @keyframes fadeOut {
@@ -69,8 +73,10 @@ h1 {
 
 <h1>Do you want a big wedding? 😏💍</h1>
 
-<button id="yes">Yes 😍</button>
-<button id="no">No 😌</button>
+<div class="container">
+    <button id="yes">Yes 😍</button>
+    <button id="no">No 😌</button>
+</div>
 
 <script>
 
@@ -80,75 +86,55 @@ h1 {
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
 
-const button = document.getElementById("yes");
-
 /* ======================
-   START POSITION (DEFAULT FLOW)
-   -> browser places it first, then we read it
+   YES BUTTON POPUP
 ====================== */
-let rect = button.getBoundingClientRect();
+const yesBtn = document.getElementById("yes");
+const noBtn = document.getElementById("no");
 
-let btnX = rect.left;
-let btnY = rect.top;
-
-/* ======================
-   MOVE BUTTON ON CLICK ONLY
-====================== */
-function moveButton() {
-    const maxX = window.innerWidth - button.offsetWidth;
-    const maxY = window.innerHeight - button.offsetHeight;
-
-    btnX = Math.random() * maxX;
-    btnY = Math.random() * maxY;
-
-    button.style.left = btnX + "px";
-    button.style.top = btnY + "px";
-
-    showPopup(messages[index]);
+yesBtn.addEventListener("click", (e) => {
+    showPopup(e.target, messages[index]);
     index = (index + 1) % messages.length;
-}
+});
 
-/* click + mobile tap */
-button.addEventListener("click", moveButton);
-button.addEventListener("touchstart", (e) => {
+/* mobile support */
+yesBtn.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    moveButton();
+    showPopup(yesBtn, messages[index]);
+    index = (index + 1) % messages.length;
 }, { passive: false });
 
 /* ======================
-   POPUP (NO SPAM)
+   NO BUTTON ACTION
 ====================== */
-let popupLock = false;
-
-function showPopup(text) {
-    if (popupLock) return;
-
-    popupLock = true;
-
-    const p = document.createElement("div");
-    p.className = "popup";
-    p.innerText = text;
-
-    document.body.appendChild(p);
-
-    setTimeout(() => {
-        p.remove();
-        popupLock = false;
-    }, 3500);
-}
+noBtn.addEventListener("click", (e) => {
+    showPopup(e.target, "okay 😌❤️");
+});
 
 /* ======================
-   NO BUTTON
+   POPUP NEXT TO BUTTON
 ====================== */
-document.getElementById("no").onclick = () => {
-    document.body.innerHTML = `
-        <h1>
-        It's okay ❤️ we'll have a big wedding 😍💍  
-        <br><br>
-        stupid fine basbosa 😂❤️
-        </h1>
-    `;
-};
+function showPopup(button, text) {
+
+    const popup = document.createElement("div");
+    popup.className = "popup";
+    popup.innerText = text;
+
+    document.body.appendChild(popup);
+
+    const rect = button.getBoundingClientRect();
+
+    // position beside button
+    popup.style.left = (rect.right + 60) + "px";
+    popup.style.top = (rect.top + rect.height / 2) + "px";
+
+    // if off screen → flip left side
+    if (popup.getBoundingClientRect().right > window.innerWidth) {
+        popup.style.left = (rect.left - 60) + "px";
+    }
+
+    setTimeout(() => popup.remove(), 3200);
+}
 
 </script>
 
