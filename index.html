@@ -55,6 +55,8 @@ button {
     background-color: #4CAF50;
     color: white;
     position: absolute;
+    left: 100px;
+    top: 100px;
 }
 
 #no {
@@ -96,24 +98,84 @@ button {
 </audio>
 
 <script>
+/* =========================
+   MESSAGE SYSTEM
+========================= */
 let messages = ["stupid 😜", "idiot 😂", "stupid fine idiot 😏", "ensy 😆"];
 let index = 0;
 
-// Move button + show popup
-function moveYes() {
-    let button = document.getElementById("yes");
+/* =========================
+   TOUCH + MOUSE TRACKING
+========================= */
+let mouseX = 0;
+let mouseY = 0;
 
-    // Move button randomly
-    button.style.left = Math.random() * (window.innerWidth - 100) + "px";
-    button.style.top = Math.random() * (window.innerHeight - 50) + "px";
+document.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
 
-    // Show popup message
-    showPopup(messages[index], button);
+document.addEventListener("touchmove", (e) => {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+}, { passive: true });
 
-    index = (index + 1) % messages.length;
+/* Mobile panic boost */
+let touchBoost = 1;
+document.addEventListener("touchstart", () => {
+    touchBoost = 3;
+    setTimeout(() => touchBoost = 1, 400);
+});
+
+/* =========================
+   BUTTON STATE
+========================= */
+let btnX = 100;
+let btnY = 100;
+let velocityX = 0;
+let velocityY = 0;
+
+/* =========================
+   RUN AWAY AI BUTTON
+========================= */
+function animateButton() {
+    const button = document.getElementById("yes");
+
+    const dx = btnX - mouseX;
+    const dy = btnY - mouseY;
+
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // escape behavior
+    if (distance < 250) {
+        let force = (250 - distance) / 250;
+
+        velocityX += dx * 0.25 * force * touchBoost;
+        velocityY += dy * 0.25 * force * touchBoost;
+    }
+
+    // friction (smooth movement)
+    velocityX *= 0.85;
+    velocityY *= 0.85;
+
+    btnX += velocityX;
+    btnY += velocityY;
+
+    // boundaries
+    let padding = 20;
+    btnX = Math.max(padding, Math.min(window.innerWidth - 100 - padding, btnX));
+    btnY = Math.max(padding, Math.min(window.innerHeight - 50 - padding, btnY));
+
+    button.style.left = btnX + "px";
+    button.style.top = btnY + "px";
+
+    requestAnimationFrame(animateButton);
 }
+animateButton();
 
-// Popup function
+/* =========================
+   POPUP SYSTEM
+========================= */
 function showPopup(text, button) {
     const popup = document.createElement("div");
     popup.classList.add("popup");
@@ -128,7 +190,23 @@ function showPopup(text, button) {
     setTimeout(() => popup.remove(), 1500);
 }
 
-// No button action
+/* =========================
+   YES BUTTON ACTION
+========================= */
+function moveYes() {
+    const button = document.getElementById("yes");
+
+    // panic boost
+    velocityX += (Math.random() - 0.5) * 20;
+    velocityY += (Math.random() - 0.5) * 20;
+
+    showPopup(messages[index], button);
+    index = (index + 1) % messages.length;
+}
+
+/* =========================
+   NO BUTTON ACTION
+========================= */
 function noClicked() {
     document.body.innerHTML = `
         <h1>
@@ -139,7 +217,9 @@ function noClicked() {
     `;
 }
 
-// Hearts animation
+/* =========================
+   HEART ANIMATION
+========================= */
 function createHeart() {
     const heart = document.createElement("div");
     heart.classList.add("heart");
